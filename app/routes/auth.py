@@ -22,66 +22,12 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 @router.post("/register", response_model=RegisterResponse, status_code=201)
 async def register(user: UserRegister):
-    """
-    Registrazione nuovo utente
-    - Controlla se l'email esiste già
-    - Crea hash della password
-    - Inserisce l'utente nel database
-    """
-    try:
-        with db.get_cursor(commit=True) as cursor:
-            # Controllo esistenza utente
-            cursor.execute(
-                "SELECT user_id FROM users WHERE email = %s",
-                (user.email,)
-            )
-            existing_user = cursor.fetchone()
-            if existing_user:
-                raise HTTPException(
-                    status_code=409,
-                    detail={
-                        "success": False,
-                        "error": "Conflict",
-                        "message": "Email already registered"
-                    }
-                )
-
-            # Creazione utente
-            user_id = str(uuid.uuid4())
-            password_hash = hash_password(user.password)
-            registration_date = datetime.utcnow()
-
-            cursor.execute(
-                """
-                INSERT INTO users (
-                    user_id, 
-                    username, 
-                    email, 
-                    password_hash, 
-                    registration_date
-                ) VALUES (%s, %s, %s, %s, %s)
-                """,
-                (user_id, user.username, user.email, password_hash, registration_date)
-            )
-
-            return RegisterResponse(
-                success=True,
-                userId=user_id,
-                message="Registration successful"
-            )
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "success": False,
-                "error": "Internal Server Error",
-                "message": str(e)
-            }
-        )
-
+    # Salta tutto, non registra nessuno
+    return RegisterResponse(
+        success=False,
+        userId=None,
+        message="Registrazione saltata (skip)"
+    )
 
 @router.post("/login", response_model=TokenResponse)
 async def login(credentials: UserLogin):
