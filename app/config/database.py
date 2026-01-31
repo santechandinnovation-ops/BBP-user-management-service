@@ -13,15 +13,15 @@ class Database:
 
     @classmethod
     def _get_connection_kwargs(cls):
-        """Get connection parameters with keepalive settings."""
+        """get conection params with keepalive setings"""
         return {
             'dsn': settings.DATABASE_URL,
-            # TCP keepalive settings to detect dead connections
+            # tcp keepalive setings to detect dead conections
             'keepalives': 1,
-            'keepalives_idle': 30,      # Start keepalive after 30s idle
-            'keepalives_interval': 10,  # Send keepalive every 10s
-            'keepalives_count': 5,      # Close after 5 failed keepalives
-            'connect_timeout': 10,      # Connection timeout
+            'keepalives_idle': 30,      # start keepalive after 30s of idel
+            'keepalives_interval': 10,  # send keepalive evry 10s
+            'keepalives_count': 5,      # close conection after 5 failed keepalives
+            'connect_timeout': 10,      # conection timeout
         }
 
     @classmethod
@@ -37,7 +37,7 @@ class Database:
 
     @classmethod
     def _test_connection(cls, conn):
-        """Test if connection is still alive."""
+        """test if conection still works"""
         try:
             with conn.cursor() as cur:
                 cur.execute("SELECT 1")
@@ -53,25 +53,25 @@ class Database:
 
         conn = cls._pool.getconn()
         
-        # Test if connection is still valid
+        # test if conection is still valid
         if not cls._test_connection(conn):
             logger.warning("Stale connection detected, reconnecting...")
             try:
                 conn.close()
             except Exception:
                 pass
-            # Put back the dead connection and get a fresh one
+            # put back dead conection and get new one
             cls._pool.putconn(conn, close=True)
             conn = cls._pool.getconn()
             
-            # Verify the new connection works
+            # make sure new conection works
             if not cls._test_connection(conn):
                 raise Exception("Failed to establish database connection")
         
         try:
             yield conn
         finally:
-            # Return connection, closing if broken
+            # return conection, close if its broken
             try:
                 if conn.closed:
                     cls._pool.putconn(conn, close=True)
